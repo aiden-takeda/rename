@@ -6,6 +6,13 @@ from my_file.file import File
 COMMAND: list[str] = ["cmd", "/c", "cls"]
 
 
+def output(total: int, renamed: int, skipped: int) -> None:
+    print("=" * 100)
+    print(f"Total files: {total}")
+    print(f"Renamed files: {renamed}")
+    print(f"Skipped files: {skipped}")
+
+
 def main() -> None:
     # Clear the screen when started
     if os.name == "nt":
@@ -16,15 +23,23 @@ def main() -> None:
     # Variables to keep the values of total files and renamed files.
     total_files: int = 0
     renamed_files: int = 0
+    skipped_files: int = 0
 
-    # Ask user if wants to be asked for each renaming (IMPORT: if files are many it will be annoying)
+    # Ask the user whether to confirm each renaming before proceeding.
     is_interactive: bool = True
-    answer: str = input("Do you want to confirm each rename? (Y/n): ")
-    if answer.lower() == "n":
+    answer: str = (
+        input("Confirm each rename before applying it? [Y/n]: ").strip().lower()
+    )
+    if answer in {"n", "no"}:
         is_interactive = False
+    elif answer not in {"", "y", "yes"}:
+        print("Using the default: confirm each rename.")
 
     # Request for user where files are located
-    directory: str = input("Directory: ")
+    directory: str = input("Directory to scan: ").strip()
+    if not os.path.isdir(directory):
+        print(f"Directory does not exist: {directory}")
+        return
 
     # List of all paths
     paths = (
@@ -43,24 +58,37 @@ def main() -> None:
                 print("-" * 100)
                 print(f"Old NAME:   {curr_file.old_file_name()}")
                 print(f"New NAME:   {curr_file.new_file_name()}")
-                ask_for_curr_rename: str = input(
-                    "Do you want to rename this file (Y/n) or (q) for quit: "
+                ask_for_curr_rename: str = (
+                    input("Rename this file? [Y/n/q]: ").strip().lower()
                 )
 
-                if ask_for_curr_rename.lower() == "q":
+                if ask_for_curr_rename == "q":
+                    output(total_files, renamed_files, skipped_files)
                     return
 
-                if ask_for_curr_rename.lower() == "y":
+                if ask_for_curr_rename in {"", "y", "yes"}:
                     renamed_files += 1
-                    curr_file.rename()
+                    try:
+                        curr_file.rename()
+                    except FileExistsError:
+                        print(
+                            f"Skipping {curr_file.old_file_name()}: destination already exists."
+                        )
+                        renamed_files -= 1
+                        skipped_files += 1
 
             else:
                 renamed_files += 1
-                curr_file.rename()
+                try:
+                    curr_file.rename()
+                except FileExistsError:
+                    print(
+                        f"Skipping {curr_file.old_file_name()}: destination already exists."
+                    )
+                    renamed_files -= 1
+                    skipped_files += 1
 
-    print("=" * 100)
-    print(f"Total files: {total_files}")
-    print(f"Renamed files: {renamed_files}")
+    output(total_files, renamed_files, skipped_files)
 
 
 if __name__ == "__main__":

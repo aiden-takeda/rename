@@ -1,4 +1,5 @@
 import os
+import re
 
 
 class File:
@@ -10,35 +11,34 @@ class File:
 
     def old_file_name(self) -> str:
         """Return the file name extracted from the current path."""
-        file_name: str = os.path.basename(self.initial_path)
-
-        if file_name == self.initial_path and "\\" in self.initial_path:
-            file_name = self.initial_path.rsplit("\\", 1)[-1]
-
-        return file_name
+        normalized_path: str = self.initial_path.replace("\\", "/")
+        return normalized_path.rsplit("/", 1)[-1]
 
     def new_file_name(self) -> str:
         """Return a lowercase, separator-normalized version of the file name."""
         file_name: str = self.old_file_name()
-        file_name = file_name.lower()
-        file_name = file_name.replace(", ", " ")
-        file_name = file_name.replace(". ", "-")
-        file_name = file_name.replace(" ", "-")
-        file_name = file_name.replace("+", "-")
-        file_name = file_name.replace("----", "---")
+        base_name, extension = os.path.splitext(file_name.lower())
+        sanitized_name: str = re.sub(r"[^a-z0-9]+", "-", base_name)
+        sanitized_name = sanitized_name.strip("-")
 
-        return file_name
+        if not sanitized_name:
+            sanitized_name = "untitled"
+
+        return f"{sanitized_name}{extension.lower()}"
 
     def new_path(self) -> str:
         """Return the path that combines the original directory and new name."""
         directory: str = os.path.dirname(self.initial_path)
-        if "\\" in self.initial_path and os.sep != "\\":
-            return directory + "\\" + self.new_file_name()
-
-        path: str = os.path.join(directory, self.new_file_name())
-
-        return path
+        return os.path.join(directory, self.new_file_name())
 
     def rename(self) -> None:
         """Rename the file on disk to its normalized path."""
-        os.rename(self.initial_path, self.new_path())
+        new_path = self.new_path()
+
+        if os.path.abspath(new_path) == os.path.abspath(self.initial_path):
+            return
+
+        if os.path.exists(new_path):
+            raise FileExistsError(f"Destination already exists: {new_path}")
+
+        os.rename(self.initial_path, new_path)

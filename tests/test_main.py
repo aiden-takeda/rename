@@ -33,6 +33,7 @@ def configure_main(
     answers_iterator: Iterator[str] = iter(answers)
 
     monkeypatch.setattr(main_module, "File", StubFile)
+    monkeypatch.setattr(main_module.os.path, "isdir", lambda path: True)
     monkeypatch.setattr(
         main_module.os,
         "walk",
