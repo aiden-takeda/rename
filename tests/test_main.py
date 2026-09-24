@@ -95,4 +95,7 @@ def test_main_quit_stops_before_renaming(monkeypatch: Any, capsys: Any) -> None:
     run_main()
 
     assert StubFile.renamed_paths == []
-    assert "Total files:" not in capsys.readouterr().out
+    output = capsys.readouterr().out
+    assert "Total files: 1" in output
+    assert "Renamed files: 0" in output
+    assert "Skipped files: 0" in output
