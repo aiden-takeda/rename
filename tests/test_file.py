@@ -19,6 +19,7 @@ def test_old_file_name_returns_name_from_path() -> None:
         ("chapter. one.txt", "chapter-one.txt"),
         ("many    spaces.txt", "many-spaces.txt"),
         ("file__name!!!.txt", "file-name.txt"),
+        ("copilot-instructions(26).md", "copilot-instructions-(26).md"),
     ],
 )
 def test_new_file_name_normalizes_name(initial_name: str, expected_name: str) -> None:
