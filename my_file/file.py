@@ -18,7 +18,7 @@ class File:
         """Return a lowercase, separator-normalized version of the file name."""
         file_name: str = self.old_file_name()
         base_name, extension = os.path.splitext(file_name.lower())
-        sanitized_name: str = re.sub(r"[^a-z0-9()]+", "-", base_name)
+        sanitized_name: str = re.sub(r"[^a-z0-9()&]+", "-", base_name)
         sanitized_name = re.sub(r"(?<=[a-z0-9])\(", "-(", sanitized_name)
         sanitized_name = re.sub(r"\)(?=[a-z0-9])", ")-", sanitized_name)
         sanitized_name = re.sub(r"-{2,}", "-", sanitized_name)

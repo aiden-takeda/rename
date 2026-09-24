@@ -20,6 +20,7 @@ def test_old_file_name_returns_name_from_path() -> None:
         ("many    spaces.txt", "many-spaces.txt"),
         ("file__name!!!.txt", "file-name.txt"),
         ("copilot-instructions(26).md", "copilot-instructions-(26).md"),
+        ("3-git-github-&-github-actions.mp4", "3-git-github-&-github-actions.mp4"),
     ],
 )
 def test_new_file_name_normalizes_name(initial_name: str, expected_name: str) -> None:
