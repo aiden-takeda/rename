@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "type": "command",
+        "powershell": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/python-context.ps1",
+        "cwd": ".github/hooks",
+        "timeoutSec": 30
+      }
+    ]
+  }
+}
